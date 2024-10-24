@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Home {% endblock title %}
+
+{% block content %}
+<!-- Page Content -->
+    <!-- Banner Starts Here -->
+    <div class="main-banner header-text">
+      <div class="container-fluid">
+        <div class="owl-banner owl-carousel">
+          
+        </div>
+      </div>
+    </div>
+    <!-- Banner Ends Here -->
+
+
+<section class="blog-posts">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="all-blog-posts">
+            <div class="row">
+              {% for event in events|slice:"3" %}
+              <div class="col-lg-12">
+                <div class="blog-post">
+                  <div class="blog-thumb">
+                    <img src="#" alt="">
+                  </div>
+                  <div class="down-content">
+                    <span>{{event.category}}</span>
+                    <a href="#"><h4>{{event.title}}</h4></a>
+                    <ul class="post-info">
+                      <li><a href="#">{{event.user.username}}</a></li>
+                      <li><a href="#">{{event.created_date}}</a></li>
+                     
+                    </ul>
+                    
+                    <div class="post-options">
+                      <div class="row">
+                        <div class="col-6">
+                          <ul class="post-tags">
+                            <li><i class="fa fa-tags"></i></li>
+                            
+                          </ul>
+                        </div>
+                        <div class="col-6">
+                          <ul class="post-share">
+                            
+                            {% if event.is_booked %}
+                                <button class="btn border border-secondary rounded-pill px-3 text-success" disabled>Already Booked</button>
+                            {% else %}
+                                <form action="{% url 'add_booking' event.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">Booking</button>
+                                </form>
+                            {% endif %}
+                            
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+              
+              <div class="col-lg-12">
+                <div class="main-button">
+                  <a href="#">View All Event</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+
+      </div>
+    </div>
+  </section>
+
+{% endblock content %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Login {% endblock title %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <!-- Banner Starts Here -->
+    <div class="heading-page header-text">
+        
+      </div>
+
+
+      <section class="contact-us">
+        <div class="container">
+          <div class="row">
+          
+            <div class="col-lg-12">
+              <div class="down-contact">
+                <div class="row">
+                  <div class="col-lg-8">
+                    <div class="sidebar-item contact-form">
+                      <div class="sidebar-heading">
+                        <h2>Login to your account</h2>
+                      </div>
+                      <div class="content">
+                        <form id="contact" action="" method="POST" novalidate>
+                            {% csrf_token %}
+                            {% if messages %}
+                            <div class="col-lg-12">
+                            {% include 'message.html' %}
+                            </div>
+                            {% endif %}
+                          <div class="row">
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <input name="username" type="text" id="username" placeholder="Username">
+                                {{form.username.errors}}
+                              </fieldset>
+                            </div>
+                            
+                            
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <input name="password" type="password" id="password" placeholder="Password">
+                                {{form.password.errors}}
+                              </fieldset>
+                            </div>
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <button type="submit" id="form-submit" class="main-button">Login</button>
+                              </fieldset>
+                            </div>
+                            <h3>Don't have an account? <a href="{% url 'register' %}">Register </a>here.
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+{% endblock content %}

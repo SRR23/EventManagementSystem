@@ -1,0 +1,16 @@
+<ul class="page-numbers">
+
+    {% if events.has_previous %}
+    <li><a href="?page={{events.previous_page_number}}"><i class="fa fa-angle-double-left"></i></a></li>
+    {% endif %}
+
+    {% for page in paginator.page_range %}
+    {% if events.number > page|add:"-4"  and events.number < page|add:"+4" %}
+    <a href="?page={{page}}" class="{% if page == events.number %} active {% endif %}">{{page}}</a>
+    {% endif %}
+    {% endfor %}
+    
+    {% if events.has_next %}
+    <li><a href="?page={{events.next_page_number}}"><i class="fa fa-angle-double-right"></i></a></li>
+    {% endif %}
+</ul>

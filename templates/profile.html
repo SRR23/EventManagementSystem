@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Profile {% endblock title %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <!-- Banner Starts Here -->
+    <div class="heading-page header-text">
+       
+      </div>
+
+
+      <section class="contact-us">
+        <div class="container">
+          <div class="row">
+          
+            <div class="col-lg-12">
+              <div class="down-contact">
+                <div class="row">
+                  <div class="col-lg-8">
+                    <div class="sidebar-item contact-form">
+                      <div class="sidebar-heading">
+                        <h2>Your Profile</h2>
+                      </div>
+                      <div class="content">
+                        <form id="contact" action="{% url 'profile' %}" method="POST" novalidate>
+                            {% csrf_token %}
+                            
+                          <div class="row">
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <input name="username" type="text" value="{{account.username}}">
+                                {{form.username.errors}}
+                              </fieldset>
+                            </div>
+                            <div class="col-lg-12">
+                                <fieldset>
+                                  <input name="first_name" type="text" value="{{account.first_name}}" placeholder="First Name">
+                                  {{form.first_name.errors}}
+                                </fieldset>
+                              </div>
+                              <div class="col-lg-12">
+                                <fieldset>
+                                  <input name="last_name" type="text" value="{{account.last_name}}" placeholder="Last Name">
+                                  {{form.last_name.errors}}
+                                </fieldset>
+                              </div>
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <input name="email" type="email" value="{{account.email}}">
+                                {{form.email.errors}}
+                              </fieldset>
+                            </div>
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <input name="new_password" type="password" value="" placeholder="New Password">
+                                {{form.password.errors}}
+                              </fieldset>
+                            </div>
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <input name="confirm_password" type="password" value="" placeholder="Confirm Password">
+                                {{form.password2.errors}}
+                              </fieldset>
+                            </div>
+                            
+                            <div class="col-lg-12">
+                              <fieldset>
+                                <button type="submit" id="form-submit" class="main-button">Update</button>
+                              </fieldset>
+                            </div>
+                            
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+{% endblock content %}

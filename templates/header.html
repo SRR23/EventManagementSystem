@@ -1,0 +1,64 @@
+<!-- Header -->
+<header class="">
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}"><h2>Event<em>.</em></h2></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item {% if current_path == '/' %}active{% endif %}">
+              <a class="nav-link" href="{% url 'home' %}">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li> 
+            <li class="nav-item {% if current_path == '/all_blogs/' %}active{% endif %}">
+              <a class="nav-link" href="#">Posts</a>
+            </li>
+            <li class="nav-item dropdown">
+
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Category
+              </a>
+              
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                {% for ctg in categories %}
+                <a class="dropdown-item" href="#">{{ctg.title}}</a>
+                
+                {% endfor %}
+              </div>
+              
+            </li>
+
+            {% if request.user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{request.user.username}}
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            
+                <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+                <a class="dropdown-item" href="{% url 'add_event' %}">Add Event</a>
+                <a class="dropdown-item" href="{% url 'my_event' %}">My Event</a>
+                <a class="dropdown-item" href="{% url 'booking_list' %}">Booking Event</a>
+                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                
+              </div>
+            </li>
+            {% else %}
+            <li class="nav-item {% if current_path == '/login/' %}active{% endif %}">
+              <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+            {% endif %}
+
+            <form class="form-inline my-2 my-lg-0" action="#" method="GET">
+              <input class="form-control mr-sm-2" name="key" type="search" placeholder="Search" aria-label="Search" required>
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
