@@ -48,6 +48,27 @@ class Home(generic.TemplateView):
 
 
 
+class All_Events(generic.ListView):
+    model = Event
+    template_name = 'all_events.html'
+    context_object_name = 'events'
+    paginate_by = 4
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        page_obj = Custom_Paginator(self.request, self.get_queryset(), self.paginate_by)
+        queryset = page_obj.get_queryset()
+        paginator = page_obj.paginator
+        
+        context['events'] = queryset
+        context['paginator'] = paginator
+        context['current_path'] = self.request.path
+        
+        return context
+
+
+
 class AddEvent(LoginRequiredMixin, generic.CreateView):
     model = Event
     form_class = AddEventForm
@@ -121,11 +142,13 @@ def add_booking(request, id):
             messages.info(request, "You have already booked this event.")
         else:
             event.booking.add(request.user)
-            messages.success(request, "Event added to booking list") 
+            messages.success(request, "Event added to booking list")
+        
     else:
         # User not authenticated, consider redirecting to login
         messages.warning(request, "Please login to add booking!!") 
         return redirect('login')
+    
 
     return redirect('booking_list')
 
@@ -136,7 +159,6 @@ class Booking_list(LoginRequiredMixin, generic.ListView):
     paginate_by = 6
     login_url = 'login'
     
-    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -145,11 +167,6 @@ class Booking_list(LoginRequiredMixin, generic.ListView):
         page_obj = Custom_Paginator(self.request, booking_events, self.paginate_by)
         queryset = page_obj.get_queryset()
         
-        # Add a flag for each event to indicate if it's booked
-        booked_event_ids = self.request.user.booking_events.values_list('id', flat=True)
-        for event in queryset:
-            event.is_booked = event.id in booked_event_ids
-            print(f"Event {event.id} is_booked: {event.is_booked}")
 
         context['events'] = queryset
         context['paginator'] = page_obj.paginator

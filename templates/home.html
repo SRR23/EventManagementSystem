@@ -47,14 +47,21 @@
                         <div class="col-6">
                           <ul class="post-share">
                             
-                            {% if event.is_booked %}
-                                <button class="btn border border-secondary rounded-pill px-3 text-success" disabled>Already Booked</button>
+                            
+                            {% if request.user in event.booking.all %}
+                                <form method="POST" action="#">
+                                {% csrf_token %}
+                                <button class="btn btn-success" disabled>Booked</button>
+                                </form>
                             {% else %}
-                                <form action="{% url 'add_booking' event.id %}" method="POST">
+                                <form method="POST" action="{% url 'add_booking' event.id %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">Booking</button>
+                                    <button type="submit" class="btn btn-primary">Book Now</button>
                                 </form>
                             {% endif %}
+
+                          
+
                             
                           </ul>
                         </div>
@@ -67,7 +74,7 @@
               
               <div class="col-lg-12">
                 <div class="main-button">
-                  <a href="#">View All Event</a>
+                  <a href="{% url 'all_events' %}">View All Event</a>
                 </div>
               </div>
             </div>

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Events {% endblock title %}
+
+{% block content %}
+
+<!-- Page Content -->
+<!-- Banner Starts Here -->
+<div class="heading-page header-text">
+    <section class="page-heading">
+        <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+            <div class="text-content">
+                <h4>Events</h4>
+                <h2>List of all events</h2>
+            </div>
+            </div>
+        </div>
+        </div>
+    </section>
+</div>
+
+<section class="blog-posts grid-system">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="all-blog-posts">
+                    <div class="row">
+                        {% for event in events %}
+                        <div class="col-lg-6">
+                            <div class="blog-post">
+                                
+                                <div class="down-content">
+                                    <span>{{event.category}}</span>
+                                    <a href="#">
+                                        <h4>{{event.title}}</h4>
+                                    </a>
+                                    <ul class="post-info">
+                                        <li><a href="#">{{event.user.username}}</a></li>
+                                        <li><a href="#">held on {{event.date}}</a></li>
+                                    
+                                    </ul>
+                                   
+                                    <div class="post-options">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <ul class="post-tags">
+                                                    <li><i class="fa fa-tags"></i></li>
+                                                    {% if request.user in event.booking.all %}
+                                                      
+                                                        <form method="POST" action="#">
+                                                        {% csrf_token %}
+                                                        <button class="btn btn-success" disabled>Booked</button>
+                                                        </form>
+                                                    {% else %}
+                                                        <form method="POST" action="{% url 'add_booking' event.id %}">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-primary">Book Now</button>
+                                                        </form>
+                                                    {% endif %}
+                                                    
+                                                </ul>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="col-lg-12">
+                            {% include 'pagination.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+{% endblock content %}
