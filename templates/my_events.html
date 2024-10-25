@@ -26,19 +26,20 @@
         <div class="container-fluid">
             <div class="row py-5">
               {% if messages %}
-              <div class="col-md-12 py-2">
-                {% include 'message.html' %}
-              </div>
+                  <div class="col-lg-12">
+                      {% include 'message.html' %}
+                  </div>
               {% endif %}
+
               {% for event in events %}
                 <div class="col-md-4 my-2">
                     <div class="card">
                        
                         <div class="card-body">
                           <p class="card-text d-flex flex-row">
-                            <a href="#">{{event.title|truncatechars:25}}</a>
+                            <a href="{% url 'event_details' event.slug %}">{{event.title|truncatechars:25}}</a>
                             <p>{{event.booking.count}} people already booked in</p>
-                            <a class="px-2 ml-auto" href="#">
+                            <a class="px-2 ml-auto" href="{% url 'update_event' event.slug %}">
                               <i class="fa fa-edit"></i>
                             </a>
                             <a class="px-2" href="?delete={{event.pk}}">

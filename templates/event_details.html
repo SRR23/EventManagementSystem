@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Event Details {% endblock title %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <!-- Banner Starts Here -->
+    <div class="heading-page header-text">
+        <section class="page-heading">
+          <div class="container">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="text-content">
+                  <h4>Event Details</h4>
+                  <h2>{{E.title}}</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+    </div>
+      
+      <!-- Banner Ends Here -->
+  
+      
+  
+    <section class="blog-posts grid-system">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8">
+              <div class="all-blog-posts">
+                <div class="row">
+                  {% if messages %}
+                  <div class="col-lg-12">
+                      {% include 'message.html' %}
+                  </div>
+                  {% endif %}
+                  <div class="col-lg-12">
+                    <div class="blog-post">
+                      
+                      <div class="down-content">
+                        <span>{{E.category}}</span>
+                        <h4>{{E.title}}</h4>
+                        <ul class="post-info">
+                          <li>{{E.user.username}}</li>
+                          <li>{{E.created_date}}</li>
+                          <li>{{E.booking.count}} people already booked in</li>
+                        </ul>
+                        <br/>
+                        <h3>Event date: {{E.date}}</h3>
+                        <h3>Venue: {{E.location}}</h3>
+                        <h3>Seat: Total {{E.seat}} seats</h3>
+                        <p>
+                            {{E.description|safe}}
+                        </p>
+                        <div class="post-options">
+                          <div class="row">
+                            <div class="col-6">
+                              <ul class="post-tags">
+                                <li><i class="fa fa-tags"></i></li>
+                                
+                              </ul>
+                            </div>
+                            <div class="col-6">
+                              <ul class="post-share">
+
+                                  {% if E.booking.count == E.seat %}
+                                      <form method="POST" action="#">
+                                      {% csrf_token %}
+                                      <button class="btn btn-success" disabled>Fully Booked</button>
+                                      </form>
+                                  {% elif request.user in E.booking.all %}
+                                      <form method="POST" action="#">
+                                      {% csrf_token %}
+                                      <button class="btn btn-success" disabled>Booked</button>
+                                      </form>
+                                  {% else %}
+                                      <form method="POST" action="{% url 'add_booking' E.id %}">
+                                          {% csrf_token %}
+                                          <button type="submit" class="btn btn-primary">Book Now</button>
+                                      </form>
+                                  {% endif %}
+
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+
+            
+            
+
+          </div>
+        </div>
+    </section>
+
+{% endblock content %}

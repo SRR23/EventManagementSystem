@@ -4,15 +4,20 @@
 
 {% block content %}
 <!-- Page Content -->
-    <!-- Banner Starts Here -->
-    <div class="main-banner header-text">
-      <div class="container-fluid">
-        <div class="owl-banner owl-carousel">
-          
-        </div>
+<div class="heading-page header-text">
+  <section class="page-heading">
+      <div class="container">
+      <div class="row">
+          <div class="col-lg-12">
+          <div class="text-content">
+              <h4>Welcome to Event Management System</h4>
+              
+          </div>
+          </div>
       </div>
-    </div>
-    <!-- Banner Ends Here -->
+      </div>
+  </section>
+</div>
 
 
 <section class="blog-posts">
@@ -21,6 +26,11 @@
         <div class="col-lg-8">
           <div class="all-blog-posts">
             <div class="row">
+              {% if messages %}
+              <div class="col-lg-12">
+                  {% include 'message.html' %}
+              </div>
+              {% endif %}
               {% for event in events|slice:"3" %}
               <div class="col-lg-12">
                 <div class="blog-post">
@@ -29,10 +39,10 @@
                   </div>
                   <div class="down-content">
                     <span>{{event.category}}</span>
-                    <a href="#"><h4>{{event.title}}</h4></a>
+                    <a href="{% url 'event_details' event.slug %}"><h4>{{event.title}}</h4></a>
                     <ul class="post-info">
-                      <li><a href="#">{{event.user.username}}</a></li>
-                      <li><a href="#">{{event.created_date}}</a></li>
+                      <li><a href="{% url 'event_details' event.slug %}">{{event.user.username}}</a></li>
+                      <li><a href="{% url 'event_details' event.slug %}">Posted: {{event.created_date}}</a></li>
                      
                     </ul>
                     
@@ -41,14 +51,19 @@
                         <div class="col-6">
                           <ul class="post-tags">
                             <li><i class="fa fa-tags"></i></li>
+                            <li><a href="{% url 'event_details' event.slug %}">Event date: {{event.date}}</a></li>
                             
                           </ul>
                         </div>
                         <div class="col-6">
                           <ul class="post-share">
                             
-                            
-                            {% if request.user in event.booking.all %}
+                            {% if event.booking.count == event.seat %}
+                               <form method="POST" action="#">
+                                {% csrf_token %}
+                                <button class="btn btn-success" disabled>Fully Booked</button>
+                                </form>
+                            {% elif request.user in event.booking.all %}
                                 <form method="POST" action="#">
                                 {% csrf_token %}
                                 <button class="btn btn-success" disabled>Booked</button>

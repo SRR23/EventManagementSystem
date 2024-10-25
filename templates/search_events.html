@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} Events {% endblock title %}
+{% block title %} Search Events {% endblock title %}
 
 {% block content %}
 
 <!-- Page Content -->
 <!-- Banner Starts Here -->
+{% if events.count %}
 <div class="heading-page header-text">
     <section class="page-heading">
         <div class="container">
         <div class="row">
             <div class="col-lg-12">
             <div class="text-content">
-                <h4>Events</h4>
-                <h2>List of all events</h2>
+                <h4>Search results for</h4>
+                <h2>{{key}}</h2>
+                <h2>{{date}}</h2>
+                <h2>{{location}}</h2>
             </div>
             </div>
         </div>
@@ -86,4 +89,19 @@
         </div>
     </div>
 </section>
+{% else %}
+<div class="heading-page header-text">
+    <section class="page-heading">
+        <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+            <div class="text-content">
+                <h4>Sorry!! events not found.</h4>
+            </div>
+            </div>
+        </div>
+        </div>
+    </section>
+</div>
+{% endif %}
 {% endblock content %}

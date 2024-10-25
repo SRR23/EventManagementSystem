@@ -24,7 +24,7 @@
               
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                 {% for ctg in categories %}
-                <a class="dropdown-item" href="#">{{ctg.title}}</a>
+                <a class="dropdown-item" href="{% url 'category_events' ctg.slug %}">{{ctg.title}}</a>
                 
                 {% endfor %}
               </div>
@@ -41,7 +41,7 @@
                 <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
                 <a class="dropdown-item" href="{% url 'add_event' %}">Add Event</a>
                 <a class="dropdown-item" href="{% url 'my_event' %}">My Event</a>
-                <a class="dropdown-item" href="{% url 'booking_list' %}">Booking Event</a>
+                <a class="dropdown-item" href="{% url 'booking_list' %}">Booked Event</a>
                 <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
                 
               </div>
@@ -52,10 +52,16 @@
             </li>
             {% endif %}
 
-            <form class="form-inline my-2 my-lg-0" action="#" method="GET">
-              <input class="form-control mr-sm-2" name="key" type="search" placeholder="Search" aria-label="Search" required>
+            <form class="form-inline my-2 my-lg-0" action="{% url 'search_events' %}" method="GET">
+              <input class="form-control mr-sm-2" name="key" type="search" placeholder="Search by title, category, or username" aria-label="Search" value="{{ key }}">
+              
+              <input class="form-control mr-sm-2" name="date" type="date" placeholder="Date" aria-label="Date" value="{{ date }}">
+              
+              <input class="form-control mr-sm-2" name="location" type="text" placeholder="Location" aria-label="Location" value="{{ location }}">
+              
               <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </form>
+          
 
           </ul>
         </div>

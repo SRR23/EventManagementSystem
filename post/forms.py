@@ -18,5 +18,9 @@ class AddEventForm(forms.ModelForm):
             "category",
             "date",
             "location",
+            "seat",
             "description"
         )
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'})  # Date picker widget
+        }
