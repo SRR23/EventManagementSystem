@@ -50,7 +50,7 @@
                                                     <li><i class="fa fa-tags"></i></li>
                                                     <li><a href="{% url 'event_details' event.slug %}">Event date: {{event.date}}</a></li>
 
-                                                    {% if event.booking.count == event.seat %}
+                                                    {% if event.booking_count == event.seat %}
                                                         <form method="POST" action="#">
                                                         {% csrf_token %}
                                                         <button class="btn btn-success" disabled>Fully Booked</button>

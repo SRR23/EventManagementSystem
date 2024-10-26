@@ -2,13 +2,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
 from account.models import CustomUser
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator, InvalidPage
-from django.db.models import Q
+from django.db.models import Q, Count
 from .models import *
 from .forms import AddEventForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse
+from django.db import connection
 
 class Custom_Paginator:
     def __init__(self, request, queryset, paginated_by):
@@ -29,16 +30,23 @@ class Custom_Paginator:
         
         return queryset
 
+    
 
 class Home(generic.TemplateView):
     template_name = 'home.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        events = Event.objects.select_related('category', 'user') \
+                     .prefetch_related('booking') \
+                     .annotate(booking_count=Count('booking')) \
+                     .order_by('-created_date')
+
         context.update(
             {
                 
-                'events': Event.objects.order_by('-created_date'),
+                'events': events,
                 
             }
         )
@@ -54,6 +62,16 @@ class All_Events(generic.ListView):
     template_name = 'all_events.html'
     context_object_name = 'events'
     paginate_by = 4
+    
+    def get_queryset(self):
+        # override queryset
+        # Optimize queryset to reduce N+1 queries
+        # Optimize by selecting related fields and annotating booking count
+        return (Event.objects
+                .select_related('category', 'user')
+                .prefetch_related('booking')
+                .annotate(booking_count=Count('booking')))
+    
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -74,8 +92,18 @@ class Event_details(generic.DetailView):
     template_name = 'event_details.html'
     context_object_name = 'E'
     slug_url_kwarg = 'slug'
+    
+    def get_queryset(self):
+        # override queryset
+        # Optimize queryset to reduce N+1 queries
+        # Optimize by selecting related fields and annotating booking count
+        return (Event.objects
+                .select_related('category', 'user')
+                .prefetch_related('booking')
+                .annotate(booking_count=Count('booking')))
 
-
+     
+    
 
 class Category_details(generic.DetailView):
     model = Category
@@ -83,22 +111,42 @@ class Category_details(generic.DetailView):
     slug_url_kwarg = 'slug'
     paginate_by = 4
     
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        # Fetch the category and prefetch related events
         category = self.get_object()
-        category_event = category.category_event.all()
+        
+        # Filter events by the selected category
+        # category_event = category.category_event.select_related('user').prefetch_related('booking').annotate(booking_count=Count('booking'))  # This will not cause N+1 issue due to prefetching
+        category_event = (
+            category.category_event
+            .select_related('user')  # Fetch related User information in one query
+            .prefetch_related('booking')  # Prefetch related Booking information
+            .annotate(booking_count=Count('booking'))  # Annotate with booking count
+        )
+        
         
         page_obj = Custom_Paginator(self.request, category_event, self.paginate_by)
         queryset = page_obj.get_queryset()
+        
+        # Print the executed queries
+        for query in connection.queries:
+            print(query['sql'])  # Prints the SQL query
         
         context['events'] = queryset
         context['paginator'] = page_obj.paginator
         context['page_obj'] = queryset
         context['is_paginated'] = queryset.has_other_pages()
         context['category_event'] = category_event
+    
         
-        return context
+        return context 
+
+
+    
+    
 
 
 class Search_Events(generic.View):

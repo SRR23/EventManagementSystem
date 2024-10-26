@@ -45,7 +45,7 @@
                         <ul class="post-info">
                           <li>{{E.user.username}}</li>
                           <li>Posted: {{E.created_date}}</li>
-                          <li>{{E.booking.count}} people already booked in</li>
+                          <li>{{E.booking_count }} people already booked in</li>
                         </ul>
                         <br/>
                         <h3>Event date: {{E.date}}</h3>
@@ -65,7 +65,7 @@
                             <div class="col-6">
                               <ul class="post-share">
 
-                                  {% if E.booking.count == E.seat %}
+                                  {% if E.booking_count == E.seat %}
                                       <form method="POST" action="#">
                                       {% csrf_token %}
                                       <button class="btn btn-success" disabled>Fully Booked</button>

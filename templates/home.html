@@ -58,7 +58,7 @@
                         <div class="col-6">
                           <ul class="post-share">
                             
-                            {% if event.booking.count == event.seat %}
+                            {% if event.booking_count == event.seat %}
                                <form method="POST" action="#">
                                 {% csrf_token %}
                                 <button class="btn btn-success" disabled>Fully Booked</button>
