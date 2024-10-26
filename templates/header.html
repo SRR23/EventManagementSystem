@@ -52,16 +52,18 @@
             </li>
             {% endif %}
 
-            <form class="form-inline my-2 my-lg-0" action="{% url 'search_events' %}" method="GET">
-              <input class="form-control mr-sm-2" name="key" type="search" placeholder="Search by title, category, or username" aria-label="Search" value="{{ key }}">
+            <form class="form-inline my-2 my-lg-0 d-flex justify-content-between" action="{% url 'search_events' %}" method="GET" style="width: 100%;">
+              <div class="d-flex">
+                <input class="form-control mr-sm-2" name="key" type="search" placeholder="title, category, or username" aria-label="Search" value="{{ key }}" style="width: 120px; font-size: 0.6rem;">
+                <input class="form-control mr-sm-2" name="date" type="date" placeholder="Date" aria-label="Date" value="{{ date }}" style="width: 100px; font-size: 0.6rem;">
+                <input class="form-control mr-sm-2" name="location" type="text" placeholder="Location" aria-label="Location" value="{{ location }}" style="width: 100px; font-size: 0.9rem;">
+              </div>
               
-              <input class="form-control mr-sm-2" name="date" type="date" placeholder="Date" aria-label="Date" value="{{ date }}">
-              
-              <input class="form-control mr-sm-2" name="location" type="text" placeholder="Location" aria-label="Location" value="{{ location }}">
-              
-              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit" style="height: 30px; font-size: 0.9rem;">Search</button>
             </form>
-          
+            
+            
+            
 
           </ul>
         </div>
