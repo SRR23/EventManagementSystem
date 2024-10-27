@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
 from account.models import CustomUser
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator, InvalidPage
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Case, When, BooleanField, F, Exists, OuterRef
 from .models import *
 from .forms import AddEventForm
 from django.urls import reverse_lazy
@@ -62,6 +62,7 @@ class All_Events(generic.ListView):
     template_name = 'all_events.html'
     context_object_name = 'events'
     paginate_by = 4
+    # _queryset = None
     
     def get_queryset(self):
         # override queryset
@@ -76,16 +77,20 @@ class All_Events(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        page_obj = Custom_Paginator(self.request, self.get_queryset(), self.paginate_by)
-        queryset = page_obj.get_queryset()
-        paginator = page_obj.paginator
+        # Get the cached queryset once for pagination
+        queryset = self.get_queryset()
+        page_obj = Custom_Paginator(self.request, queryset, self.paginate_by)
         
-        context['events'] = queryset
-        context['paginator'] = paginator
+        
+        # Update the context with paginated results
+        context['events'] = page_obj.get_queryset()  # This should already be optimized
+        context['paginator'] = page_obj.paginator
         context['current_path'] = self.request.path
+    
         
         return context
-
+    
+    
 
 class Event_details(generic.DetailView):
     model = Event
@@ -118,8 +123,6 @@ class Category_details(generic.DetailView):
         # Fetch the category and prefetch related events
         category = self.get_object()
         
-        # Filter events by the selected category
-        # category_event = category.category_event.select_related('user').prefetch_related('booking').annotate(booking_count=Count('booking'))  # This will not cause N+1 issue due to prefetching
         category_event = (
             category.category_event
             .select_related('user')  # Fetch related User information in one query
@@ -131,9 +134,6 @@ class Category_details(generic.DetailView):
         page_obj = Custom_Paginator(self.request, category_event, self.paginate_by)
         queryset = page_obj.get_queryset()
         
-        # Print the executed queries
-        for query in connection.queries:
-            print(query['sql'])  # Prints the SQL query
         
         context['events'] = queryset
         context['paginator'] = page_obj.paginator
@@ -146,9 +146,6 @@ class Category_details(generic.DetailView):
 
 
     
-    
-
-
 class Search_Events(generic.View):
     
     def get(self, *args, **kwargs):
@@ -157,7 +154,10 @@ class Search_Events(generic.View):
         location = self.request.GET.get('location', '')
 
         # Base query
-        event = Event.objects.all()
+        # event = Event.objects.all()
+        event = Event.objects.select_related('category', 'user') \
+                     .prefetch_related('booking') \
+                     .annotate(booking_count=Count('booking'))
 
         # Apply filters based on the inputs
         if key:
@@ -192,7 +192,6 @@ class AddEvent(LoginRequiredMixin, generic.CreateView):
     login_url = 'login'
 
     def form_valid(self, form):
-        # Handle tags and the user/category assignment
         
         user = get_object_or_404(CustomUser, pk=self.request.user.pk)
         category = get_object_or_404(Category, pk=self.request.POST.get('category'))
@@ -212,24 +211,65 @@ class AddEvent(LoginRequiredMixin, generic.CreateView):
         return reverse_lazy('event_details', kwargs={'slug': self.object.slug})
 
 
+
+# class MyEvents(LoginRequiredMixin, generic.ListView):
+#     model = Event
+#     template_name = 'my_events.html'
+#     paginate_by = 6
+#     login_url = 'login'
+
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         userevent = self.request.user.user_event.all().prefetch_related('booking').annotate(booking_count=Count('booking'))
+#         page_obj = Custom_Paginator(self.request, userevent, self.paginate_by)
+#         queryset = page_obj.get_queryset()
+
+#         context['events'] = queryset
+#         context['paginator'] = page_obj.paginator
+#         context['page_obj'] = queryset
+#         context['is_paginated'] = queryset.has_other_pages()
+        
+#         return context
+
+#     def dispatch(self, request, *args, **kwargs):
+#         delete = request.GET.get('delete', None)
+
+#         if delete:
+#             event = get_object_or_404(Event, pk=delete)
+
+#             if request.user.pk != event.user.pk:
+#                 return redirect('home')
+
+#             event.delete()
+#             messages.success(request, "Your event has been deleted!")
+#             return redirect('my_event')
+
+#         return super().dispatch(request, *args, **kwargs)
+
+
 class MyEvents(LoginRequiredMixin, generic.ListView):
     model = Event
     template_name = 'my_events.html'
     paginate_by = 6
     login_url = 'login'
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        userevent = self.request.user.user_event.all()
-        page_obj = Custom_Paginator(self.request, userevent, self.paginate_by)
-        queryset = page_obj.get_queryset()
+        user_events = (
+            self.request.user.user_event.all()
+            .prefetch_related('booking')
+            .annotate(booking_count=Count('booking'))
+        )
+        paginated_events = Custom_Paginator(self.request, user_events, self.paginate_by).get_queryset()
 
-        context['events'] = queryset
-        context['paginator'] = page_obj.paginator
-        context['page_obj'] = queryset
-        context['is_paginated'] = queryset.has_other_pages()
-        
+        context.update({
+            'events': paginated_events,
+            'paginator': paginated_events.paginator,
+            'page_obj': paginated_events,
+            'is_paginated': paginated_events.has_other_pages(),
+        })
+
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -246,6 +286,7 @@ class MyEvents(LoginRequiredMixin, generic.ListView):
             return redirect('my_event')
 
         return super().dispatch(request, *args, **kwargs)
+    
 
 
 def add_booking(request, id):
@@ -269,28 +310,68 @@ def add_booking(request, id):
     return redirect('booking_list')
 
 
+# class Booking_list(LoginRequiredMixin, generic.ListView):
+#     model = Event
+#     template_name = 'my_booking.html'
+#     paginate_by = 6
+#     login_url = 'login'
+    
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+        
+#         booking_events = self.request.user.booking_events.all()
+#         page_obj = Custom_Paginator(self.request, booking_events, self.paginate_by)
+#         queryset = page_obj.get_queryset()
+        
+
+#         context['events'] = queryset
+#         context['paginator'] = page_obj.paginator
+#         context['page_obj'] = queryset
+#         context['is_paginated'] = queryset.has_other_pages()
+        
+#         return context
+    
+
+#     def dispatch(self, request, *args, **kwargs):
+#         delete = request.GET.get('delete', None)
+
+#         if delete:
+#             event = get_object_or_404(Event, pk=delete)
+
+#             if event in request.user.booking_events.all():
+#                 request.user.booking_events.remove(event)
+#                 messages.success(request, "Event has been removed from your booking!")
+#             else:
+#                 messages.error(request, "Event not found in your booking!")
+
+#             return redirect('booking_list')
+
+#         return super().dispatch(request, *args, **kwargs)
+
+
 class Booking_list(LoginRequiredMixin, generic.ListView):
     model = Event
     template_name = 'my_booking.html'
     paginate_by = 6
     login_url = 'login'
     
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        booking_events = self.request.user.booking_events.all()
-        page_obj = Custom_Paginator(self.request, booking_events, self.paginate_by)
-        queryset = page_obj.get_queryset()
-        
+        # Fetch and paginate booking events
+        user_bookings = self.request.user.booking_events.all()
+        paginated_events = Custom_Paginator(self.request, user_bookings, self.paginate_by).get_queryset()
 
-        context['events'] = queryset
-        context['paginator'] = page_obj.paginator
-        context['page_obj'] = queryset
-        context['is_paginated'] = queryset.has_other_pages()
-        
+        # Update context
+        context.update({
+            'events': paginated_events,
+            'paginator': paginated_events.paginator,
+            'page_obj': paginated_events,
+            'is_paginated': paginated_events.has_other_pages(),
+        })
+
         return context
-    
 
     def dispatch(self, request, *args, **kwargs):
         delete = request.GET.get('delete', None)
@@ -307,6 +388,7 @@ class Booking_list(LoginRequiredMixin, generic.ListView):
             return redirect('booking_list')
 
         return super().dispatch(request, *args, **kwargs)
+
 
 
 class UpdateEvent(LoginRequiredMixin, generic.UpdateView):

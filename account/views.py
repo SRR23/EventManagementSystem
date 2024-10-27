@@ -49,7 +49,7 @@ class LoginView(View):
                 messages.success(request, 'Logged in successfully!')
                 return redirect('home')  # Redirect to home after login
             else:
-                messages.error(request, 'Invalid credentials')
+                messages.warning(request, 'Invalid credentials')
         return render(request, self.template_name, {'form': form})
 
 
