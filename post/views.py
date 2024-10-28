@@ -19,6 +19,8 @@ class Custom_Paginator:
         self.page = request.GET.get('page', 1)
         
     def get_queryset(self):
+        
+        
         try:
             queryset = self.paginator.page(self.page)
         except PageNotAnInteger:
@@ -143,6 +145,7 @@ class Category_details(generic.DetailView):
     
         
         return context 
+
 
 
     

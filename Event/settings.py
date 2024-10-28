@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'account',
     'post',
     'tinymce',
-    'debug_toolbar',
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
